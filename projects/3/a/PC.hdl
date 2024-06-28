@@ -2,6 +2,7 @@
 // and the book "The Elements of Computing Systems"
 // by Nisan and Schocken, MIT Press.
 // File name: projects/3/a/PC.hdl
+
 /**
  * A 16-bit counter.
  * if      reset(t): out(t+1) = 0
@@ -9,10 +10,17 @@
  * else if inc(t):   out(t+1) = out(t) + 1
  * else              out(t+1) = out(t)
  */
+
+
 CHIP PC {
-    IN in[16],inc, load, reset;
-    OUT out[16];
+  IN in[16],inc, load, reset;
+  OUT out[16];
     
-    PARTS:
-    //// Replace this comment with your code.
+  PARTS:
+    Inc16(in =regOut, out=incOut);
+    Mux16(a=regOut, b=incOut, sel=inc, out=out0);
+    Mux16(a=out0, b=in, sel=load, out=out1);
+    Mux16(a=out1, b=false, sel=reset, out=out2);
+    Register(in=out2,  load=true, out=out, out=regOut);
+    
 }
