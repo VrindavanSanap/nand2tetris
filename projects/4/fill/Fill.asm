@@ -15,8 +15,8 @@ D=A
 M=D
 
 // n = RAM[0]
-@0
-D=M
+@8192
+D=A
 @n
 M=D
 
@@ -24,7 +24,7 @@ M=D
 @i
 M=0
 
-@32
+@1
 D=A
 @increment
 M=D
@@ -38,13 +38,15 @@ D=D-M
 @END
 D;JEQ
 
-//RAM[arr+i] = -1
+//RAM[arr] = -1
+//arr=arr+1
+@addr
+A=M
+M=-1
 @increment
 D=M
 @addr
 M=D+M
-A=M 
-M=-1
 
 //
 @i
@@ -56,5 +58,4 @@ M=M+1
 (END)
 @END
 0;JMP
-
 
