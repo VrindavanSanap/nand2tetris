@@ -1,17 +1,17 @@
-// Adds up two numbers
-// RAM[2] = RAM[0] + RAM[1]
+// created by vrindava sanap
+// add2.asm 
+// adds up two numbers
+// ram[2] = ram[0] + ram[1]
 
-
-
-
-@0
+@R0
 D = M 
 
-@1
-D =D + M 
+@R1
+D = D + M 
 
-@2
+@R2
 M = D
 
-@6
+(END)
+@END
 0;JMP
