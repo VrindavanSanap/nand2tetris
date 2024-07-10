@@ -41,20 +41,40 @@ CHIP ALU {
         ng;      // if (out < 0)  equals 1, else 0
 
     PARTS:
-        Mux16(a=x,b=false,sel=zx ,out=x0);
-        Mux16(a=y,b=false,sel=zy ,out=y0);
+
         Not16(in=x0,out=Notx);
         Not16(in=y0,out=Noty);
+
+        // zx zero the x input
+        Mux16(a=x,b=false,sel=zx ,out=x0);
+        // zy zero the y input
+        Mux16(a=y,b=false,sel=zy ,out=y0);
+
+
+        // nx, negate the x input
         Mux16(a=x0,b=Notx,sel=nx ,out=x1);
+        // ny, negate the y input
         Mux16(a=y0,b=Noty,sel=ny ,out=y1);
+
+        // x + y
         Add16(a=x1, b=y1, out=xAddy);
+        // x & y
         And16(a=x1, b=y1, out=xAndy);
+
+        // f decides x+y or x-y
         Mux16(a=xAndy,b=xAddy,sel=f ,out=out1);
+
+        // no, negate output
         Not16(in=out1,out=Notout1);
-        Mux16(a=out1,b=Notout1,sel=no ,out=out, out[15]=Firstout, out[0..7]=Leftout, out[8..15]=Rightout);
+
+        Mux16(a=out1, b=Notout1,sel=no ,out=out, out[15]=Firstout, out[0..7]=Leftout, out[8..15]=Rightout);
+
+        // if all are zero, zr = 1 
         Or8Way(in=Leftout,out=Or8Leftout);
         Or8Way(in=Rightout,out=Or8Rightout);
         Or(a=Or8Leftout, b=Or8Rightout,out=Or16out);
         Not(in=Or16out,out=zr);
+
+        // if out is negative, ng = 1
         And(a=Firstout, b=true, out=ng);
 }
