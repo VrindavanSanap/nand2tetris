@@ -32,10 +32,50 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-	    //// Replace this comment with your code.
-        Mux16(a=instruction, b=true, sel=instruction[15], out=mux1Out);
-        Not(in=instruction[15], out=loadA);
-        Register(in=mux1Out, load=loadA, out=aRegisterOut);
 
-        PC(in=aRegisterOut, load=false, inc=true, reset=reset, out[0..14]=pc);
+        // A Register
+        // Load instructionM if aType instruction 
+        // Load aluOut if d1,instruction[5] 
+        Not(in=instruction[15], out=aType);
+        Mux16(a=instruction, b=aluOut, sel=instruction[15], out=mux1Out);
+        Or(a=aType, b=instruction[5], out=loadA);
+        ARegister(in=mux1Out, load=loadA, out=aRegisterOut, out[0..14]=addressM);
+
+
+        // a, inM[12] --> replace A with M  
+        Mux16(a=aRegisterOut, b=inM, sel=instruction[12], out=mux2Out);
+
+        // D Register
+        DRegister(in=aluOut, load=instruction[4], out=dRegisterOut);
+
+        // ALU
+        ALU(x=dRegisterOut, y=mux2Out, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=aluOut,out=outM, zr=zr, ng=ng);
+
+        // Jump logic
+        // if anyone of the condtion is met and cType instruction 
+        // then set PC to  aRegister
+        Not(in=ng, out=notNg);
+        Not(in=zr, out=notZr);
+        And(a=notNg, b=notZr, out=pos);
+        // Not(in=zr, out=isZero);
+            //cond1
+            And(a=ng, b=instruction[2], out=cond1);
+            //cond2
+            And(a=zr, b=instruction[1], out=cond2);
+            //cond3
+            And(a=pos, b=instruction[0], out=cond3);
+
+            // Check if atleast one is true
+            Or(a=cond1, b=cond2, out=or1);
+            Or(a=or1, b=cond3, out=cond);
+            
+            // Check cType
+            And(a=cond, b=instruction[15], out=jump);
+
+        // Program counter
+        PC(in=aRegisterOut, load=jump, inc=true, reset=reset, out[0..14]=pc);
+
+        // writeM
+        // write if opcode is write and destinationM(instruction[3]) is selected
+        And(a=instruction[15], b=instruction[3], out=writeM);
 }
